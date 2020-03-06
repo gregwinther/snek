@@ -19,9 +19,27 @@ class MatplotlibGui:
         plt.clf()
 
 
+class TerminalGui:
+    def __init__(self, title="Snake game"):
+        self.title = title + " score: {0}"
+        self._clear_terminal()
+
+    def _clear_terminal(self):
+        print("\033c", end="")
+
+    def render(self, state):
+        self._clear_terminal()
+
+        print(self.title.format(0))
+        print(np.array(state.board))
+
+    def tear_down(self):
+        pass
+
+
 if __name__ == "__main__":
-    from state import State
+    from snake import SnakeGame
 
     gui = MatplotlibGui()
-    gui.render(State(initial_length=7))
+    gui.render(SnakeGame(initial_length=7))
     plt.show()
