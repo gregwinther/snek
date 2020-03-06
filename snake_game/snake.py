@@ -83,8 +83,11 @@ class SnakeGame:
 
         point = [iy, ix]
 
-        if point in self.snake:
-            return self.place_food()
+        while point in self.snake:
+            ix = randint(1, self.board_width - 2)
+            iy = randint(1, self.board_height - 2)
+
+            point = [iy, ix]
 
         self.board[iy][ix] = self.FOOD
 
