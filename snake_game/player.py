@@ -29,6 +29,43 @@ def random_engine(game, speed):
     return choice(list(game.ACTIONS.values()))
 
 
+def best_engine(game, speed):
+
+    time.sleep(speed)
+
+    action = game.ACTIONS["FORWARD"]
+
+    y_0, x_0 = game.snake[0]
+    y_1, x_1 = game.snake[1]
+
+    right_edge = game.board_width - 2
+    bottom_edge = game.board_height - 2
+
+    # At the top
+    if y_0 == 1:
+        action = game.ACTIONS["RIGHT"]
+    
+    # At left edge
+    elif x_0 == 1 and x_1 > 1:
+        action = game.ACTIONS["RIGHT"]
+
+    # At the right edge
+    elif x_0 == right_edge and x_1 < right_edge:
+        action = game.ACTIONS["RIGHT"]
+
+    # At the bottom
+    elif y_0 == bottom_edge - 1:
+        # Anywhere, but in bottom right corner
+        if not x_0 == right_edge and x_0 > 1:
+            action = game.ACTIONS["LEFT"]
+    
+    # Bottom right corner
+    elif y_0 == bottom_edge and x_0 == right_edge:
+            action = game.ACTIONS["RIGHT"]
+
+    return action
+
+
 class KeyboardListener:
     def __init__(self, game):
         self.game = game
@@ -66,5 +103,5 @@ if __name__ == "__main__":
     snake_game = SnakeGame()
     keyboard_listener = KeyboardListener(snake_game)
 
-    player = Player(snake_game, keyboard_listener, YeetTerminalGui(), speed=7)
+    player = Player(snake_game, best_engine, TerminalGui(), speed=1)
     player.play_game()
