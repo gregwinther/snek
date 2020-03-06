@@ -30,8 +30,21 @@ class TerminalGui:
     def render(self, state):
         self._clear_terminal()
 
-        print(self.title.format(0))
-        print(np.array(state.board))
+        print(self.title.format(state.score))
+        board = np.array(state.board, dtype=object)
+        board[board == 0] = " "
+        board[board == 1] = chr(9671)
+        board[board == 2] = chr(9632)
+        # Grinning emoji - a bit too wide
+        # board[board == 3] = chr(int("1f600", 16))
+        board[board == 3] = chr(9632)
+        # Pile of poop emogji - a bit too wide
+        # board[board == -1] = chr(int("1f4a9", 16))
+        board[board == -1] = chr(9679)
+        for row in board:
+            for elem in row:
+                print(elem, end=" ")
+            print()
 
     def tear_down(self):
         pass
