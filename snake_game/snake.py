@@ -2,16 +2,14 @@ import numpy as np
 from random import randint, choice
 
 
-BORDER = 1
-BODY = 2
-HEAD = 3
-FOOD = -1
+class SnakeGame:
+    BORDER = 1
+    BODY = 2
+    HEAD = 3
+    FOOD = -1
 
+    ACTIONS = dict(FORWARD=0, LEFT=-1, RIGHT=1)
 
-ACTIONS = dict(FORWARD=0, LEFT=-1, RIGHT=1)
-
-
-class State:
     def __init__(self, board_width=20, board_height=20, initial_length=3):
         assert (board_height - 2) - initial_length > 0 and (
             board_width - 2
@@ -38,12 +36,12 @@ class State:
         board = [[0] * width for i in range(height)]
 
         for i in range(width):
-            board[0][i] = BORDER
-            board[height - 1][i] = BORDER
+            board[0][i] = SnakeGame.BORDER
+            board[height - 1][i] = SnakeGame.BORDER
 
         for i in range(height):
-            board[i][0] = BORDER
-            board[i][width - 1] = BORDER
+            board[i][0] = SnakeGame.BORDER
+            board[i][width - 1] = SnakeGame.BORDER
 
         return board
 
@@ -70,12 +68,12 @@ class State:
 
         # Place head of the snake
         iy, ix = self.snake[0]
-        self.board[iy][ix] = HEAD
+        self.board[iy][ix] = self.HEAD
 
         # Place the body of the snake
         for point in self.snake[1:]:
             iy, ix = point
-            self.board[iy][ix] = BODY
+            self.board[iy][ix] = self.BODY
 
     def place_food(self):
         # XXX: This should be constructed as an exercise
@@ -88,12 +86,12 @@ class State:
         if point in self.snake:
             return self.place_food()
 
-        self.board[iy][ix] = FOOD
+        self.board[iy][ix] = self.FOOD
 
         return point
 
-    def step(self, action):
-        assert action in ACTIONS.values()
+    def __call__(self, action):
+        assert action in self.ACTIONS.values()
 
         if self.done:
             return self
@@ -118,9 +116,9 @@ class State:
 
         delta_i, delta_j = i_0 - i_1, j_0 - j_1
 
-        if action == ACTIONS["LEFT"]:
+        if action == self.ACTIONS["LEFT"]:
             delta_i, delta_j = self._turn_left(delta_i, delta_j)
-        elif action == ACTIONS["RIGHT"]:
+        elif action == self.ACTIONS["RIGHT"]:
             delta_i, delta_j = self._turn_right(delta_i, delta_j)
 
         new_head = [i_0 + delta_i, j_0 + delta_j]
@@ -152,7 +150,7 @@ class State:
 
 if __name__ == "__main__":
     # Test initialization
-    state = State(board_width=6, board_height=6, initial_length=3)
+    state = SnakeGame(board_width=6, board_height=6, initial_length=3)
     print("\033c", end="")
     print(np.array(state.board))
 
@@ -161,7 +159,7 @@ if __name__ == "__main__":
     time.sleep(0.5)
 
     for i in range(10):
-        state.step(choice(list(ACTIONS.values())))
+        state(choice(list(state.ACTIONS.values())))
         print("\033c", end="")
         print(np.array(state.board))
         time.sleep(0.5)
