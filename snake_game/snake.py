@@ -101,7 +101,7 @@ class SnakeGame:
 
         if self._food_eaten():
             self.score += 1
-            self.place_food()
+            self.food = self.place_food()
         else:
             self._remove_snake_tail()
 
