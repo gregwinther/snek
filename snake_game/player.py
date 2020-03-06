@@ -1,3 +1,7 @@
+from pynput.keyboard import Key, Listener
+import threading
+import time
+
 SPEED = {i: 0.05 * i for i in range(0, 10)}
 
 
@@ -20,15 +24,47 @@ class Player:
 
 def random_engine(game, speed):
     from random import choice
-    import time
 
     time.sleep(speed)
     return choice(list(game.ACTIONS.values()))
+
+
+class KeyboardListener:
+    def __init__(self, game):
+        self.game = game
+        self.action_list = []
+
+        listener = Listener(on_press=self.on_press)
+        listener.start()
+
+    def on_press(self, key):
+
+        if key == Key.left:
+            self.action_list.append(self.game.ACTIONS["LEFT"])
+
+        if key == Key.right:
+            self.action_list.append(self.game.ACTIONS["RIGHT"])
+
+        if key == Key.esc:
+            self.game.done = True
+
+    def __call__(self, game, speed):
+        time.sleep(speed)
+
+        action = self.game.ACTIONS["FORWARD"]
+
+        if len(self.action_list) > 0:
+            action = self.action_list.pop(0)
+
+        return action
 
 
 if __name__ == "__main__":
     from snake import SnakeGame
     from gui import MatplotlibGui, TerminalGui
 
-    player = Player(SnakeGame(), random_engine, TerminalGui(), speed=7)
+    snake_game = SnakeGame()
+    keyboard_listener = KeyboardListener(snake_game)
+
+    player = Player(snake_game, keyboard_listener, TerminalGui(), speed=7)
     player.play_game()
