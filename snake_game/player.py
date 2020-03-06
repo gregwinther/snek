@@ -61,10 +61,10 @@ class KeyboardListener:
 
 if __name__ == "__main__":
     from snake import SnakeGame
-    from gui import MatplotlibGui, TerminalGui
+    from gui import MatplotlibGui, TerminalGui, YeetTerminalGui
 
     snake_game = SnakeGame()
     keyboard_listener = KeyboardListener(snake_game)
 
-    player = Player(snake_game, keyboard_listener, TerminalGui(), speed=7)
+    player = Player(snake_game, keyboard_listener, YeetTerminalGui(), speed=7)
     player.play_game()
