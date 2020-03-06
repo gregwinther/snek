@@ -12,6 +12,7 @@ tensorflow = "*"
 keras = "*"
 pyqt5 = "*"
 black = "*"
+pynput = "*"
 
 [requires]
 python_version = "3.7"
