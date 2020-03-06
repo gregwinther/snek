@@ -126,11 +126,11 @@ class SnakeGame:
 
     def _turn_left(self, delta_i, delta_j):
         # XXX: Exercise
-        return delta_j, -delta_i
+        return -delta_j, delta_i
 
     def _turn_right(self, delta_i, delta_j):
         # XXX: Exercise
-        return -delta_j, delta_i
+        return delta_j, -delta_i
 
     def _check_collisions(self):
         # XXX: Exercise
