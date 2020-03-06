@@ -2,6 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+class NoGui:
+    def __init__(self, title="Snake game"):
+        self.title = title + " score: {0}"
+
+    def render(self, state):
+        print(self.title.format(state.score))
+
+    def tear_down(self):
+        pass
+
+
 class MatplotlibGui:
     def __init__(self, title="Snake game"):
         plt.figure()

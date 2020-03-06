@@ -44,7 +44,7 @@ def best_engine(game, speed):
     # At the top
     if y_0 == 1:
         action = game.ACTIONS["RIGHT"]
-    
+
     # At left edge
     elif x_0 == 1 and x_1 > 1:
         action = game.ACTIONS["RIGHT"]
@@ -58,10 +58,10 @@ def best_engine(game, speed):
         # Anywhere, but in bottom right corner
         if not x_0 == right_edge and x_0 > 1:
             action = game.ACTIONS["LEFT"]
-    
+
     # Bottom right corner
     elif y_0 == bottom_edge and x_0 == right_edge:
-            action = game.ACTIONS["RIGHT"]
+        action = game.ACTIONS["RIGHT"]
 
     return action
 
@@ -98,10 +98,10 @@ class KeyboardListener:
 
 if __name__ == "__main__":
     from snake import SnakeGame
-    from gui import MatplotlibGui, TerminalGui, YeetTerminalGui
+    from gui import MatplotlibGui, TerminalGui, YeetTerminalGui, NoGui
 
     snake_game = SnakeGame()
     keyboard_listener = KeyboardListener(snake_game)
 
-    player = Player(snake_game, best_engine, TerminalGui(), speed=1)
+    player = Player(snake_game, best_engine, NoGui(), speed=0)
     player.play_game()
