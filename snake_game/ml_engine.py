@@ -64,12 +64,6 @@ class DNN_Engine:
                        lr            = 2e-2,
                        max_iter      = 500,
                        engine = Random()):
-        #self.snake = [[9, 11], [9, 10], [9, 9]]
-
-        #self.food = [15, 10]
-        #angle = self.get_angle(self)
-        #print(np.array(self.food) - np.array(self.snake[0]))
-        #print(angle)
         
         self.engine = engine
         self.model_torch()
@@ -79,15 +73,14 @@ class DNN_Engine:
         """Get random action in the interval (-1, 0, 1). """
         return self.engine(state)
 
-    def __call__(self, state, speed):
+    def __call__(self, state, speed=0):
         """Call the class. """
         time.sleep(speed)
-        #observation = self.generate_observation(state)
         predictions = []
         for action in range(-1, 2):
             #input_data = self.get_input_data(state, action)
-            snake, food, board = self.generate_observation(state)
-            prev_observation = self.training_obs(snake, food, board)
+            #snake, food, board = self.generate_observation(state)
+            prev_observation = self.training_obs(state)
             input_data = self.add_action_to_observation(prev_observation, action)
             x = torch.tensor(input_data.reshape(-1, 5))
             predictions.append(self.model(x.float()))
@@ -97,33 +90,8 @@ class DNN_Engine:
         """Get angle between snake and food in the coordinate system of snake. """
         # XXX: find anti-clock-wise angle between some point a and some point b
         # return None
-        b = np.asarray(food) #np.array(state.food) - np.array(state.snake[0])
-        '''
-        print(b)
         
-        #b = [1, 1]
-        snake_dir = self.snake_direction(state)
-        if snake_dir[0] == 0:
-            b *= snake_dir[1]
-        elif snake_dir[1] == 0:
-            b = np.array([-snake_dir[0] * b[1], snake_dir[0] * b[0]])
-        
-        print(b)
-        
-        angle = np.arctan2(b[1], b[0])
-        
-        #snake_dir = [0, 1]
-        #moving_angle = np.arctan2(snake_dir[1], snake_dir[0])
-        
-        #print(b)
-        #print(snake_dir)
-        #print(angle/np.pi)
-        #print(moving_angle/np.pi)
-        #print((angle - moving_angle)/np.pi)
-        #fkfk
-        '''
-        angle = np.arctan2(b[1], b[0])
-        return (angle)/(np.pi * np.linalg.norm(b))
+        return np.arctan2(food[1], food[0])
 
 
     def get_distance(self, state):
@@ -153,11 +121,9 @@ class DNN_Engine:
         snake_head = np.array(state.snake[0])
         board = np.array(state.board)
         
-        snake_dir = self.snake_direction(state)     # Snake directions
-        snake_dir_ort = np.array([-snake_dir[1], snake_dir[0]])
-        front = snake_head + snake_dir              # front coordinate
-        right = snake_head - snake_dir_ort          # right coordinate
-        left = snake_head + snake_dir_ort           # left coordinate
+        front = snake_head + self.snake_dir              # front coordinate
+        right = snake_head - self.snake_dir_ort          # right coordinate
+        left = snake_head + self.snake_dir_ort           # left coordinate
         try:
             vision = [board[front[0],front[1]], 
                       board[right[0],right[1]], 
@@ -166,6 +132,60 @@ class DNN_Engine:
             vision = [1, 1, 1]
 
         return vision
+        
+    def turn_to_the_left(self, vector):
+        return [-vector[1], vector[0]]
+        
+    def transform_coord(self, state, coord):
+        """Tranform coordinate. """
+        matrix = np.array([self.snake_dir, self.snake_dir_ort])
+        coord = np.array(coord) - np.array(state.snake[0])
+        trans = matrix.dot(coord)
+        return [int(trans[0]), int(trans[1])]
+        
+    def generate_observation(self, state): #, action):
+        # Returns all positions in coordinate system relative
+        # to the snake head
+        
+        self.snake_dir = self.snake_direction(state)
+        self.snake_dir_ort = self.turn_to_the_left(self.snake_dir)  # Normal to snake_dir
+        
+        # Tranform snake
+        transform_snake = state.snake.copy()
+        for i in range(len(transform_snake)):
+            transform_snake[i] = self.transform_coord(state, transform_snake[i])
+            
+        # Transform food to snake coordinates
+        transform_food = self.transform_coord(state, state.food)
+        
+        # Snake vision
+        vision = self.get_vision(state)
+        #angle = self.get_angle(state)
+        #return np.array([action, vision[0], vision[1], vision[2], angle])
+
+        return transform_snake, transform_food, vision
+        
+    def training_obs(self,state):
+        #snake, food, board = self.generate_observation(state)
+        
+        self.snake_dir = self.snake_direction(state)
+        self.snake_dir_ort = self.turn_to_the_left(self.snake_dir)  # Normal to snake_dir
+        
+        # Tranform snake
+        transform_snake = state.snake.copy()
+        for i in range(len(transform_snake)):
+            transform_snake[i] = self.transform_coord(state, transform_snake[i])
+            
+        # Transform food to snake coordinates
+        transform_food = self.transform_coord(state, state.food)
+        
+        # Snake vision
+        vision = self.get_vision(state)
+        
+        obs = vision.copy()
+        angle = self.get_angle(transform_food)
+        obs.append(angle)
+        return np.array(obs)
         
     def get_input_data(self, state, action):
         vision = self.get_vision(state)
@@ -178,72 +198,9 @@ class DNN_Engine:
         [[action, vision, angle], target]
         """
         # XXX: Implement
-        input_data = self.get_input_data(state, action)
+        input_data = self.training_obs(state)
+        input_data = np.append(action, input_data)
         return [input_data, target]
-        
-    def turn_to_the_left(self, vector):
-        return [-vector[1], vector[0]]
-        
-    def generate_observation(self, state):
-        # Returns all positions in coordinate system relative
-        # to the snake head
-        origin = state.snake[0]
-        snake_dir = [
-            state.snake[0][0] - state.snake[1][0],
-            state.snake[0][1] - state.snake[1][1],
-        ]
-        snake_dir_ort = self.turn_to_the_left(snake_dir)  # Normal to snake_dir
-        # Find matrix for coordinate transformation
-        matrix = np.array([snake_dir, snake_dir_ort])
-        
-        # Tranform snake
-        transform_snake = state.snake.copy()
-        for i in range(len(transform_snake)):
-            pos = np.array(transform_snake[i]) - np.array(origin)
-            trans = matrix.dot(pos)
-            transform_snake[i] = [int(trans[0]), int(trans[1])]
-            
-        # Transform food to snake coordinates
-        pos = np.array(state.food) - np.array(origin)
-        trans = matrix.dot(pos)
-        transform_food = [int(trans[0]), int(trans[1])]
-        # Find transform of board up to a given distance from the origin
-        # Start by (2n+1)x(2n+1) size around origin
-        # Fill with border outside of the board size
-        
-        # Snake vision
-        transform_board = []
-        obs_pos=[[1, 0], [0, -1], [0, 1]]
-        for i in range(len(obs_pos)):
-        
-            ix = obs_pos[i][0]
-            iy = obs_pos[i][1]
-            x = ix * snake_dir[0] + iy * snake_dir_ort[0] + origin[0]
-            y = ix * snake_dir[1] + iy * snake_dir_ort[1] + origin[1]
-            if (
-                x >= 0
-                and x < state.board_width
-                and y >= 0
-                and y < state.board_height
-            ):
-                boardval = state.board[x][y]
-            else:
-                boardval = 1  # Mark outside as a wall
-            if boardval > 1:  # Transform to 0 to 1 range
-                boardval = 1
-            transform_board.append(boardval)
-
-        return (
-            transform_snake,
-            transform_food,
-            transform_board,
-            )
-        
-    def training_obs(self,snake,food,board):
-        obs = board.copy()
-        angle = self.get_angle(food)
-        obs.append(angle)
-        return np.array(obs)
         
     def add_action_to_observation(self,observation, action):
         return np.append([action], observation)
@@ -258,14 +215,12 @@ class DNN_Engine:
             state = SnakeGame()
             prev_food_distance = self.get_distance(state)
             prev_score = state.score
-            snake, food, board = self.generate_observation(state)
-            prev_observation = self.training_obs(snake, food, board)
-            #print(prev_observation)
+            prev_observation = self.training_obs(state) #snake, food, board)
             for j in range(goal_steps):
                 action = self.generate_random_action(state)
                 state = state(action)
                 if state.done:
-                    target = -1         # The move causing death is always bad
+                    #target = -1         # The move causing death is always bad
                     #training_data.append(self.pack_data(state, action, target))
                     training_data.append([self.add_action_to_observation(prev_observation, action), -1])
 
@@ -279,16 +234,12 @@ class DNN_Engine:
                     else:
                         #target = 0
                         training_data.append([self.add_action_to_observation(prev_observation, action), 0])
-                    snake, food, board = self.generate_observation(state)
-                    prev_observation = self.training_obs(snake, food, board)
+                    #snake, food, board = self.generate_observation(state)
+                    prev_observation = self.training_obs(state) #snake, food, board)
                     #training_data.append(self.pack_data(state, action, target))
 
                     prev_food_distance = food_distance
                     prev_score = state.score
-                #print(state.board)
-                #print(self.pack_data(state, action, target))
-                #print('\n\n\n')
-        print(training_data[0])
         return training_data
 
     def model_torch(self):
@@ -350,9 +301,9 @@ class DNN_Engine:
         print(score)
 
 if __name__ == "__main__":
-    engine = DNN_Engine(initial_games=1000, lr=2e-2, max_iter=500, goal_steps=1000)
     from player import Player
     from gui import MatplotlibGui
-
+    
+    engine = DNN_Engine(initial_games=1000, lr=2e-2, max_iter=500, goal_steps=1000)
     player = Player(SnakeGame(), engine, MatplotlibGui())
     player.play_game()
