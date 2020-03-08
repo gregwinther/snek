@@ -2,6 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+class NoGui:
+    def __init__(self, title="Snake game"):
+        self.title = title + " score: {0}"
+
+    def render(self, state):
+        print(self.title.format(state.score))
+
+    def tear_down(self):
+        pass
+
+
 class MatplotlibGui:
     def __init__(self, title="Snake game"):
         plt.figure()
@@ -35,12 +46,8 @@ class TerminalGui:
         board[board == 0] = " "
         board[board == 1] = chr(9671)
         board[board == 2] = chr(9632)
-        # Grinning emoji - a bit too wide
-        board[board == 3] = chr(int("1f600", 16))
-        # board[board == 3] = chr(9632)
-        # Pile of poop emogji - a bit too wide
-        board[board == -1] = chr(int("1f4a9", 16))
-        # board[board == -1] = chr(9679)
+        board[board == 3] = chr(9632)
+        board[board == -1] = chr(9679)
         for row in board:
             for elem in row:
                 print(elem, end=" ")
@@ -48,6 +55,24 @@ class TerminalGui:
 
     def tear_down(self):
         pass
+
+
+class YeetTerminalGui(TerminalGui):
+    def render(self, state):
+        self._clear_terminal()
+
+        print(self.title.format(state.score))
+
+        board = np.array(state.board, dtype=object)
+        board[board == 0] = chr(int("1f331", 16))
+        board[board == 1] = chr(int("1f5fb", 16))
+        board[board == 2] = chr(int("1f534", 16))
+        board[board == 3] = chr(int("1f923", 16))
+        board[board == -1] = chr(int("1f4a9", 16))
+        for row in board:
+            for elem in row:
+                print(elem, end=" ")
+            print()
 
 
 if __name__ == "__main__":
