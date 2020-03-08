@@ -1,4 +1,3 @@
-import numpy as np
 from random import randint, choice
 
 
@@ -152,12 +151,13 @@ class SnakeGame:
 
 
 if __name__ == "__main__":
+    import numpy as np
+    import time
+
     # Test initialization
-    state = SnakeGame(board_width=6, board_height=6, initial_length=3)
+    state = SnakeGame(board_width=10, board_height=10, initial_length=3)
     print("\033c", end="")
     print(np.array(state.board))
-
-    import time
 
     time.sleep(0.5)
 
