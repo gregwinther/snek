@@ -23,131 +23,185 @@ class SnakeGame:
         self.snake = self.init_snake(
             self.initial_length, self.board_width, self.board_height
         )
-        self.place_snake()
-        self.food = self.place_food()
+        self._place_snake()
+        self.food = self._place_food()
 
         self.done = False
         self.score = 0
 
     @staticmethod
     def init_board(width, height):
-        # XXX: This should be constructed as an exercise
-        board = [[0] * width for i in range(height)]
+        """Static method creating a board, and padding all edges with a border.
 
-        for i in range(width):
-            board[0][i] = SnakeGame.BORDER
-            board[height - 1][i] = SnakeGame.BORDER
+        Parameters
+        ----------
+        width : int
+            The width of the board, i.e., the number of columns.
+        height : int
+            The height of the board, i.e., the number of rows.
 
-        for i in range(height):
-            board[i][0] = SnakeGame.BORDER
-            board[i][width - 1] = SnakeGame.BORDER
-
-        return board
+        Returns
+        -------
+        list
+            Empty board with filled edges.
+        """
+        pass
 
     @staticmethod
     def init_snake(snake_length, width, height):
-        # XXX: This should be constructed as an exercise
-        # Note: Use consistent ordering of rows and columns with the board
+        """Static method initializing the snake as a list with coordinates of
+        the head and the body of the snake. This function should find a random
+        location on the board (within the borders of the board) for the head of
+        the snake. Next it should add elements for the body in a straight line
+        from the head. Optionally the head could be placed vertically or
+        horizontally on the board. Also, it could optionally be "reversed".
 
-        ix_0 = randint(1, width - snake_length - 1)
-        iy_0 = randint(1, height - snake_length - 1)
+        Parameters
+        ----------
+        snake_length : int
+            The length of snake, head included. Note that this length needs to
+            fit on the board.
+        width : int
+            The width of the board, i.e., the number of columns.
+        height : int
+            The height of the board, i.e., the number of rows.
 
-        horizontal = randint(0, 1) == 1
-        reverse = randint(0, 1) == 1
+        Returns
+        -------
+        list
+            A list with the coordinates of the snake. The first element (the
+            first coordinate) is interpreted as the head of the snake.
+        """
+        pass
 
-        snake = [
-            [iy_0, ix_0 + i] if horizontal else [iy_0 + i, ix_0]
-            for i in range(snake_length)
-        ]
+    def _place_snake(self):
+        """Class method "placing" the snake on the board. This is done by using
+        the coordinates of the snake as indices on the board, and setting the
+        values of these elements to ``self.HEAD`` for the head of the snake, and
+        ``self.BODY`` for the body of the snake.
+        """
+        pass
 
-        return snake if not reverse else list(reversed(snake))
+    def _place_food(self):
+        """Class method placing food on the board. To do this you need to find
+        a random point on the board that is not a border nor inside the snake.
+        The first condition can be achieved by drawing valid random numbers, but
+        the latter condition must be tested by checking if the food is inside the
+        snake.
 
-    def place_snake(self):
-        # XXX: This should be constructed as an exercise
-
-        # Place head of the snake
-        iy, ix = self.snake[0]
-        self.board[iy][ix] = self.HEAD
-
-        # Place the body of the snake
-        for point in self.snake[1:]:
-            iy, ix = point
-            self.board[iy][ix] = self.BODY
-
-    def place_food(self):
-        # XXX: This should be constructed as an exercise
-
-        ix = randint(1, self.board_width - 2)
-        iy = randint(1, self.board_height - 2)
-
-        point = [iy, ix]
-
-        while point in self.snake:
-            ix = randint(1, self.board_width - 2)
-            iy = randint(1, self.board_height - 2)
-
-            point = [iy, ix]
-
-        self.board[iy][ix] = self.FOOD
-
-        return point
+        Returns
+        -------
+        list
+            The coordinates of the newly placed food.
+        """
+        pass
 
     def __call__(self, action):
         assert action in self.ACTIONS.values()
 
+        # Check if we are done
         if self.done:
             return self
 
+        # Move the snake one step
         self._move_snake_head(action)
+        # Check if we have collided
         self._check_collisions()
 
+        # Check if the food has been eaten
         if self._food_eaten():
+            # Increase the score and place new food
             self.score += 1
-            self.food = self.place_food()
+            self.food = self._place_food()
         else:
+            # If no food was eaten, remove last point in the snake and from the
+            # board
             self._remove_snake_tail()
 
-        self.place_snake()
+        # Place the updated snake on the board
+        self._place_snake()
 
         return self
 
     def _move_snake_head(self, action):
-        # XXX: Exercise
-        i_0, j_0 = self.snake[0]
-        i_1, j_1 = self.snake[1]
+        """Class method performing the specified action and creating a new head
+        for the snake. This is done by finding the change in position of the
+        current head. Then, depending on the action, a new coordinate for the
+        head should be inserted at the beginning of the ``self.snake``-list.
 
-        delta_i, delta_j = i_0 - i_1, j_0 - j_1
-
-        if action == self.ACTIONS["LEFT"]:
-            delta_i, delta_j = self._turn_left(delta_i, delta_j)
-        elif action == self.ACTIONS["RIGHT"]:
-            delta_i, delta_j = self._turn_right(delta_i, delta_j)
-
-        new_head = [i_0 + delta_i, j_0 + delta_j]
-        self.snake.insert(0, new_head)
+        Parameters
+        ----------
+        action : int
+            A valid action that can be found in the
+            ``SnakeGame.Actions``-dictionary.
+        """
+        pass
 
     def _turn_left(self, delta_i, delta_j):
-        # XXX: Exercise
-        return -delta_j, delta_i
+        """Class method taking in the velocity of the snake, and returning the
+        new velocity by rotating the velocity vector by 90 degrees to the left.
+
+        Parameters
+        ----------
+        delta_i : int
+            Speed of the snake in the height-direction, i.e., along the rows of
+            the board.
+        delta_j : int
+            Speed of the snake in the width-direction, i.e., along the columns
+            of the board.
+
+        Returns
+        -------
+        tuple, list
+            The velocity turned 90 degrees to the left.
+        """
+        pass
 
     def _turn_right(self, delta_i, delta_j):
-        # XXX: Exercise
-        return delta_j, -delta_i
+        """Class method taking in the velocity of the snake, and returning the
+        new velocity by rotating the velocity vector by 90 degrees to the right.
+
+        Parameters
+        ----------
+        delta_i : int
+            Speed of the snake in the height-direction, i.e., along the rows of
+            the board.
+        delta_j : int
+            Speed of the snake in the width-direction, i.e., along the columns
+            of the board.
+
+        Returns
+        -------
+        tuple, list
+            The velocity turned 90 degrees to the right.
+        """
+        pass
 
     def _check_collisions(self):
-        # XXX: Exercise
-        i_0, j_0 = self.snake[0]
-        if self.board[i_0][j_0] > 0:
-            self.done = True
+        """Class method checking if the head of the snake has hit a border or
+        its own body. If a collision has occured, ``self.done`` should be set to
+        ``True``.
+        """
+        pass
 
     def _food_eaten(self):
-        # XXX: Exercise
-        return self.snake[0] == self.food
+        """Class method checking if the food has been eaten by the snake. It is
+        enough to check if the coordinates of the head of the snake is the same
+        as the coordinates of the food.
+
+        Returns
+        -------
+        bool
+            Whether or not the food has been eaten. ``True`` denotes that the
+            food has been eaten.
+        """
+        pass
 
     def _remove_snake_tail(self):
-        # XXX: Exercise
-        i, j = self.snake.pop()
-        self.board[i][j] = 0
+        """Class method removing the tail, i.e., the last coordinate of the
+        snake, from ``self.snake`` and the board.
+        """
+        pass
 
 
 if __name__ == "__main__":
