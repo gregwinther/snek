@@ -44,6 +44,16 @@ class SnakeGame:
         -------
         list
             Empty board with filled edges.
+
+        >>> import numpy as np
+        >>> board = SnakeGame.init_board(6, 6)
+        >>> print(np.array(board))
+        [[1 1 1 1 1 1]
+         [1 0 0 0 0 1]
+         [1 0 0 0 0 1]
+         [1 0 0 0 0 1]
+         [1 0 0 0 0 1]
+         [1 1 1 1 1 1]]
         """
         pass
 
@@ -71,6 +81,17 @@ class SnakeGame:
         list
             A list with the coordinates of the snake. The first element (the
             first coordinate) is interpreted as the head of the snake.
+
+        >>> from random import seed
+        >>> seed(2020)
+        >>> snake = SnakeGame.init_snake(3, 7, 7)
+        >>> print(len(snake))
+        3
+        >>> for coord in snake:
+        ...     print(len(coord))
+        2
+        2
+        2
         """
         pass
 
@@ -79,6 +100,13 @@ class SnakeGame:
         the coordinates of the snake as indices on the board, and setting the
         values of these elements to ``self.HEAD`` for the head of the snake, and
         ``self.BODY`` for the body of the snake.
+
+        >>> import numpy as np
+        >>> sg = SnakeGame(10, 10, 3)
+        >>> np.sum(np.array(sg.board) == sg.HEAD)
+        1
+        >>> np.sum(np.array(sg.board) == sg.BODY)
+        2
         """
         pass
 
@@ -93,6 +121,10 @@ class SnakeGame:
         -------
         list
             The coordinates of the newly placed food.
+
+        >>> sg = SnakeGame(10, 10, 3)
+        >>> len(sg.food)
+        2
         """
         pass
 
@@ -134,11 +166,25 @@ class SnakeGame:
         action : int
             A valid action that can be found in the
             ``SnakeGame.Actions``-dictionary.
+
+        >>> sg = SnakeGame(10, 10, 2)
+        >>> sg.snake = [[5, 5], [5, 4]]
+        >>> sg._place_snake()
+        >>> sg._move_snake_head(sg.ACTIONS["FORWARD"])
+        >>> sg.snake
+        [[5, 6], [5, 5], [5, 4]]
+        >>> sg._move_snake_head(sg.ACTIONS["LEFT"])
+        >>> sg.snake
+        [[4, 6], [5, 6], [5, 5], [5, 4]]
+        >>> sg._move_snake_head(sg.ACTIONS["RIGHT"])
+        >>> sg.snake
+        [[4, 7], [4, 6], [5, 6], [5, 5], [5, 4]]
         """
         pass
 
-    def _turn_left(self, delta_i, delta_j):
-        """Class method taking in the velocity of the snake, and returning the
+    @staticmethod
+    def _turn_left(delta_i, delta_j):
+        """Static method taking in the velocity of the snake, and returning the
         new velocity by rotating the velocity vector by 90 degrees to the left.
 
         Parameters
@@ -152,13 +198,19 @@ class SnakeGame:
 
         Returns
         -------
-        tuple, list
+        list
             The velocity turned 90 degrees to the left.
+
+        >>> SnakeGame._turn_left(1, 0)
+        [0, 1]
+        >>> SnakeGame._turn_left(0, 1)
+        [-1, 0]
         """
         pass
 
-    def _turn_right(self, delta_i, delta_j):
-        """Class method taking in the velocity of the snake, and returning the
+    @staticmethod
+    def _turn_right(delta_i, delta_j):
+        """Static method taking in the velocity of the snake, and returning the
         new velocity by rotating the velocity vector by 90 degrees to the right.
 
         Parameters
@@ -174,6 +226,11 @@ class SnakeGame:
         -------
         tuple, list
             The velocity turned 90 degrees to the right.
+
+        >>> SnakeGame._turn_right(1, 0)
+        [0, -1]
+        >>> SnakeGame._turn_right(0, 1)
+        [1, 0]
         """
         pass
 
@@ -181,6 +238,15 @@ class SnakeGame:
         """Class method checking if the head of the snake has hit a border or
         its own body. If a collision has occured, ``self.done`` should be set to
         ``True``.
+
+        >>> sg = SnakeGame(10, 10, 3)
+        >>> sg.done
+        False
+        >>> sg.snake = [[0, 2], [1, 2], [2, 2]]
+        >>> sg._place_snake()
+        >>> sg._check_collisions()
+        >>> sg.done
+        True
         """
         pass
 
@@ -194,12 +260,33 @@ class SnakeGame:
         bool
             Whether or not the food has been eaten. ``True`` denotes that the
             food has been eaten.
+
+        >>> sg = SnakeGame(10, 10, 3)
+        >>> sg.snake = [[5, 5], [5, 4], [5, 3]]
+        >>> sg._place_snake()
+        >>> sg.food = [5, 6]
+        >>> sg._move_snake_head(sg.ACTIONS["FORWARD"])
+        >>> sg.snake
+        [[5, 6], [5, 5], [5, 4], [5, 3]]
+        >>> sg._food_eaten()
+        True
         """
         pass
 
     def _remove_snake_tail(self):
         """Class method removing the tail, i.e., the last coordinate of the
         snake, from ``self.snake`` and the board.
+
+        >>> sg = SnakeGame(10, 10, 3)
+        >>> sg.snake = [[5, 5], [5, 4], [5, 3]]
+        >>> sg._place_snake()
+        >>> sg.board[5][3] == sg.BODY
+        True
+        >>> sg._remove_snake_tail()
+        >>> sg.board[5][3] == 0
+        True
+        >>> sg.snake
+        [[5, 5], [5, 4]]
         """
         pass
 
