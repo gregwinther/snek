@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
-from random import randint
+from random import randint, seed
 import numpy as np
 
+seed(30)
 
 class SnakeGame:
     def __init__(
@@ -84,6 +85,9 @@ class SnakeGame:
         # -1 - LEFT
         #  0 - FORWARD
         #  1 - RIGHT
+        #print(self.board)
+        #print(self.food)
+        #print(self.snake)
         if self.done == True:
             self.end_game()
         self.create_new_point_in_snake(key)
@@ -145,28 +149,24 @@ class SnakeGame:
         ]
         snake_dir_ort = self.turn_to_the_left(snake_dir)  # Normal to snake_dir
         # Find matrix for coordinate transformation
-        matrix = np.linalg.inv(np.array([snake_dir, snake_dir_ort])).T
+        matrix = np.array([snake_dir, snake_dir_ort])
+        
+        # Tranform snake
         transform_snake = self.snake.copy()
         for i in range(len(transform_snake)):
             pos = np.array(transform_snake[i]) - np.array(origin)
             trans = matrix.dot(pos)
             transform_snake[i] = [int(trans[0]), int(trans[1])]
-            x = (
-                transform_snake[i][0] * snake_dir[0]
-                + transform_snake[i][1] * snake_dir_ort[0]
-                + origin[0]
-            )
-            y = (
-                transform_snake[i][0] * snake_dir[1]
-                + transform_snake[i][1] * snake_dir_ort[1]
-                + origin[1]
-            )
+            
+        # Transform food to snake coordinates
         pos = np.array(self.food) - np.array(origin)
         trans = matrix.dot(pos)
         transform_food = [int(trans[0]), int(trans[1])]
         # Find transform of board up to a given distance from the origin
         # Start by (2n+1)x(2n+1) size around origin
         # Fill with border outside of the board size
+        
+        # Snake vision
         transform_board = []
 
         for i in range(len(self.obs_pos)):
@@ -186,19 +186,6 @@ class SnakeGame:
             if boardval > 1:  # Transform to 0 to 1 range
                 boardval = 1
             transform_board.append(boardval)
-
-        # n = 1
-        # for ix in range(-n,n+1):
-        #     for iy in range(-n,n+1):
-        #         x = ix*snake_dir[0] + iy*snake_dir_ort[0] + origin[0]
-        #         y = ix*snake_dir[1] + iy*snake_dir_ort[1] + origin[1]
-        #         if x>=0 and x<self.board_width and y>=0 and y<self.board_height:
-        #             boardval = self.board[x][y]
-        #         else:
-        #             boardval = 1 # Mark outside as a wall
-        #         if (boardval)>1: # Transform to 0 to 1 range
-        #             boardval = 1
-        #         transform_board.append(boardval)
 
         return (
             self.done,
