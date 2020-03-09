@@ -30,7 +30,8 @@ def random_engine(game, speed):
 
 
 def best_engine(game, speed):
-
+    # Note: This engine only works for even board widths!
+    # It also sometimes crashes if the snake is placed alongside the border.
     time.sleep(speed)
 
     action = game.ACTIONS["FORWARD"]
