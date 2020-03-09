@@ -16,38 +16,26 @@ class Random:
     def __init__(self):
         return None
 
-    def __call__(self, state):
-        # XXX: Implement random state (-1, 0, 1)
-        # return None
-
+    def __call__(self, state, speed=0):
+        """This function returns a random integer
+        in the interval (-1, 1). 
+        
+        Parameters
+        ----------
+        state : object
+            object containing information about the 
+            state. Is never used in this class, but 
+            all engine classes require this parameter.
+        speed : int
+            speed of snake. speed=0 is the fastest.
+            
+        Returns
+        -------
+        int
+            which way to turn (-1 is left, 0 is no turn, 1 is right).
+        """
+        time.sleep(speed)
         return randint(-1, 1)
-
-
-class RandomAssisted:
-    """Engine based on random moves, but the snake should
-    not crash if it can avoid it. """
-
-    def __init__(self):
-        return None
-
-    def __call__(self, state):
-        # XXX: Implement
-        vision = state.vision
-        if vision[0] > 0 and vision[1] > 0:
-            action = -1
-        elif vision[0] > 0 and vision[2] > 0:
-            action = 1
-        elif vision[1] > 0 and vision[2] > 0:
-            action = 0
-        elif vision[0] > 0:
-            action = randint(0, 1) * 2 - 1
-        elif vision[1] > 0:
-            action = randint(0, 1) - 1
-        elif vision[2] > 0:
-            action = randint(0, 1)
-        else:
-            action = randint(-1, 1)
-        return action
 
 
 ################################################################
@@ -58,6 +46,19 @@ class RandomAssisted:
 class DNN_Engine:
     """Snake engine controlled by a fully connected dense neural
     network. 
+    
+    Parameters
+    ----------
+    initial_games : int
+        number of games for the training
+    goal_steps : int
+        max number of steps in a game
+    lr : float
+            learning rate
+    max_iter : int
+        maximum number of training iterations (epochs)
+    engine : object
+        engine to be used in the training process
     """ 
     def __init__(self, initial_games = 1000,
                        goal_steps    = 500,
@@ -69,12 +70,23 @@ class DNN_Engine:
         self.model_torch()
         self.train_torch(lr, max_iter, initial_games, goal_steps)
 
-    def generate_random_action(self, state):
-        """Get random action in the interval (-1, 0, 1). """
-        return self.engine(state)
-
     def __call__(self, state, speed=0):
-        """Call the class. """
+        """This function returns the next turn given by the
+        neural network. 
+        
+        Parameters
+        ----------
+        state : object
+            object containing information about the 
+            state.
+        speed : int
+            speed of snake. speed=0 is the fastest.
+            
+        Returns
+        -------
+        int
+            which way to turn (-1 is left, 0 is no turn, 1 is right).
+        """
         time.sleep(speed)
         predictions = []
         for action in range(-1, 2):
@@ -83,49 +95,124 @@ class DNN_Engine:
             x = torch.tensor(input_data.reshape(-1, 5))
             predictions.append(self.model(x.float()))
         return np.argmax(np.array(predictions))-1
+        
+    def generate_action(self, state):
+        """Get next action, given an engine self.engine.
+        To be used in the training session.
+        
+        Parameters
+        ----------
+        state : object
+            object containing information about the 
+            state.
+        """
+        return self.engine(state)
 
     @staticmethod
     def get_angle(food):
-        """Get angle between snake and food in the coordinate system of snake. """
-        # XXX: find anti-clock-wise angle between some point a and some point b
-        # return None
+        """Get angle between snake and food in the coordinate system of snake. 
         
+        Parameters
+        ----------
+        food : list, ndarray
+            list containing the coordinates of the snake
+            in the coordinate system of the snake.
+            
+        Returns
+        -------
+        float
+            which way the food is in the coordinate system of snake
+        
+        >>> get_angle([0, 1])
+        1.5707963267948966
+        >>> get_angle([1, 0])
+        0.0
+        """
         return np.arctan2(food[1], food[0])
 
     @staticmethod
-    def get_distance(state):
-        """Get distance between origin and coordinate b. """
-        # XXX: find distance between some point b and origin
-        # return None
-
-        a = np.array(state.snake[0])
-        b = np.array(state.food)
-        return np.linalg.norm(a - b)
+    def get_distance(snake_head,food):
+        """Get Euclidean distance between snake head and food. 
+        
+        Parameters
+        ----------
+        snake_head : list, ndarray
+            list containing the coordinates of the snake head
+            in the coordinate system of the board.
+        food : list, ndarray
+            list containing the coordinates of the food in the
+            coordinate system of the board.
+            
+        Returns
+        -------
+        float
+            euclidean distance between snake and food
+            
+        >>> get_distance([1,0], [4,0])
+        3.0
+        >>> get_distance([1,0], [2,1])
+        1.4142135623730951
+        """
+        snake_head = np.array(snake_head)
+        food = np.array(food)
+        return np.linalg.norm(snake_head - food)
 
     @staticmethod
-    def snake_direction(state):
-        """Returns the moving direction of the snake. """
-        # XXX: Here, you should find a unit vector of
-        # return None
-
+    def snake_direction(snake):
+        """Gives the moving direction of the snake. 
+        
+        Parameters
+        ----------
+        snake : list, ndarray
+            list containing the coordinates of the snake.
+            
+        Returns
+        -------
+        ndarray
+            unit vector in the moving direction of the snake.
+            
+        >>> snake_direction([[5,6],[5,5],[5,4]])
+        [0,1]
+        >>> snake_direction([[3,2],[3,1],[4,1]])
+        [1,0]
+        """
         snake_dir = [
-            state.snake[0][0] - state.snake[1][0],
-            state.snake[0][1] - state.snake[1][1],
+            snake[0][0] - snake[1][0],
+            snake[0][1] - snake[1][1],
         ]
         return np.array(snake_dir)
 
     @staticmethod
     def get_vision(snake_head,snake_dir,snake_dir_ort,board):
-        """Get vision of snake (in front, to the left and to the right)."""
-        # XXX: Implement
+        """Get what the snake sees in front of it, to the
+        left and to the right.
+        
+        Parameters
+        ----------
+        snake_head : ndarray
+            list containing the coordinates of the snake head
+            in the coordinate system of the board.
+        snake_dir : ndarray
+            the moving direction of snake
+        snake_dir_ort : ndarray
+            unit vector that is orthogonal to the moving direction
+        board : nested list
+            the board
+            
+        Returns
+        -------
+        list
+            list containing what is in the front, to the right and to
+            the left of the snake.
+        """
         
         front = snake_head + snake_dir              # front coordinate
         right = snake_head - snake_dir_ort          # right coordinate
         left = snake_head + snake_dir_ort           # left coordinate
         try:
-            vision = [board[front[0],front[1]], 
-                      board[right[0],right[1]], 
-                      board[left[0],left[1]]]
+            vision = [board[front[0]][front[1]], 
+                      board[right[0]][right[1]], 
+                      board[left[0]][left[1]]]
         except:
             vision = [1, 1, 1]
 
@@ -133,7 +220,27 @@ class DNN_Engine:
         
     @staticmethod
     def transform_coord(coord,snake_head,snake_dir,snake_dir_ort):
-        """Tranform coordinate. """
+        """Transform a coordinate from board coordinates
+        to snake coordinates.
+        
+        Parameters
+        ----------
+        coord : list, ndarray
+            coordinate to be transformed
+        snake_head : ndarray
+            list containing the coordinates of the snake head
+            in the coordinate system of the board.
+        snake_dir : ndarray
+            the moving direction of snake
+        snake_dir_ort : ndarray
+            unit vector that is orthogonal to the moving direction
+            
+        Returns
+        -------
+        list
+            list containing what is in the front, to the right and to
+            the left of the snake.
+        """
         
         # Define transformation matrix
         matrix = np.array([snake_dir, snake_dir_ort])
@@ -148,10 +255,23 @@ class DNN_Engine:
     def get_observation(self,state):
         """Generate observation to be used as input to
         the neural network. The next action is not known at this point,
-        so we need to add it later. """
+        so we need to add it later. 
+        
+        Parameters
+        ----------
+        state : object
+            object containing information about the 
+            state.
+            
+        Returns
+        -------
+        ndarray
+            array containing the vision of the snake and the food
+            direction.
+        """
         
         # Moving direction of snake head
-        snake_dir = self.snake_direction(state)
+        snake_dir = self.snake_direction(state.snake)
         
         # Unit vector pointing orthogonal to the moving direction
         snake_dir_ort = np.asarray(state._turn_left(snake_dir[0], snake_dir[1]))
@@ -167,27 +287,58 @@ class DNN_Engine:
         return np.array([vision[0], vision[1], vision[2], angle])
         
     @staticmethod
-    def pack_data(input_data,action,target):
-        """Pack input data and target for the current move.
+    def pack_data(observation,action,target):
+        """Collect the input data and target for the current move.
         should take the form:
-        [(action, vision, angle), target]
+        [(action, vision, angle), target].
+        
+        Parameters
+        ----------
+        observation : ndarray
+            array obtaining the vision and angle, returned by
+            self.get_observation
+        action : int
+            the current action (which way to go)
+        target : int
+            evaluation of the move (1 is good, 0 is neutral, -1 is bad)
+            
+        Returns
+        -------
+        list
+            list where the inputs to the neural network and targets
+            are collected
         """
-        # XXX: Implement
-        input_data = np.append(action, input_data)
+        input_data = np.append(action, observation)
         return [input_data, target]
         
     def generate_training_data(self,initial_games,goal_steps):
         """Generate training data for the neural network 
-        based on random action. """
+        based on random action. 
+        
+        Parameters
+        ----------
+        initial_games : int
+            number of games for the training
+        goal_steps : int
+            max number of steps in a game
+            
+        Returns
+        -------
+        list
+            list containing the input data and the targets
+        """
         training_data = []
         from tqdm import tqdm
         for i in tqdm(range(initial_games)):
             state = SnakeGame()
-            prev_food_distance = self.get_distance(state)
+            prev_food_distance = self.get_distance(state.snake[0], state.food)
             prev_score = state.score
             prev_observation = self.get_observation(state)
             for j in range(goal_steps):
-                action = self.generate_random_action(state)
+                # Get action
+                action = self.generate_action(state)
+                
+                # Update state
                 state = state(action)
                 
                 # We will now evaluate the performed moves, using
@@ -200,7 +351,7 @@ class DNN_Engine:
                     training_data.append(self.pack_data(prev_observation, action, target))
                     break
                 else:
-                    food_distance = self.get_distance(state)
+                    food_distance = self.get_distance(state.snake[0], state.food)
                     
                     # A move is considered as good if the snake 
                     # gets closer to the food or eats the food. 
@@ -215,13 +366,13 @@ class DNN_Engine:
         return training_data
 
     def model_torch(self):
-        """Model of a dense neural network. """
-        # XXX: implement a dense neural network using pytorch
-        # modules = []
-        # --- do something here ---
-        # self.model = nn.Sequential(*modules)
-        # return self.model
-
+        """Model of a dense neural network. 
+        
+        Returns
+        -------
+        object
+            object containing the pytorch model
+        """
         modules = []
         modules.append(nn.Linear(5, 25))
         modules.append(nn.ReLU())
@@ -230,6 +381,19 @@ class DNN_Engine:
         return self.model
 
     def train_torch(self, lr, max_iter, initial_games, goal_steps):
+        """Train the naural network model.
+        
+        Parameters
+        ----------
+        lr : float
+            learning rate
+        max_iter : int
+            maximum number of training iterations (epochs)
+        initial_games : int
+            number of games for the training
+        goal_steps : int
+            max number of steps in a game
+        """
         # Get data
         training_data = self.generate_training_data(initial_games, goal_steps)
         x = torch.tensor([i[0] for i in training_data]).reshape(-1, 5)
@@ -251,31 +415,10 @@ class DNN_Engine:
             loss.backward()   # perform a backward pass (backpropagation)
             optimizer.step()  # update parameters
 
-    def visualise_game(self, vis_steps=500):
-        game = SnakeGame(gui = True)
-        state = game.start()
-        prev_observation = self.generate_observation(state)
-        for j in range(vis_steps):
-            predictions = []
-            for action in range(-1, 2):
-                x = torch.tensor(
-                    self.add_action_to_observation(prev_observation, action).reshape(
-                        -1, 5
-                    )
-                )
-                predictions.append(self.model(x.float()))
-            action = np.argmax(np.array(predictions)) - 1
-            done, score, snake, food, board = game.step(action)
-            if done:
-                break
-            else:
-                prev_observation = self.generate_observation(snake, food, board)
-        print(score)
-
 if __name__ == "__main__":
     from player import Player
-    from gui import MatplotlibGui
+    from gui import MatplotlibGui, TerminalGui
     
-    engine = DNN_Engine(initial_games=1000, lr=2e-2, max_iter=500, goal_steps=1000)
-    player = Player(SnakeGame(), engine, MatplotlibGui())
+    engine = DNN_Engine(initial_games=500, lr=2e-2, max_iter=500)
+    player = Player(SnakeGame(), engine, TerminalGui(), speed=1)
     player.play_game()
