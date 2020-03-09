@@ -106,16 +106,13 @@ class SnakeGame:
         """
         # Note: Use consistent ordering of rows and columns with the board
 
-        ix_0 = randint(1, width - snake_length - 1)
-        iy_0 = randint(1, height - snake_length - 1)
+        i = randint(1, height - snake_length - 1)
+        j = randint(1, width - snake_length - 1)
 
         horizontal = randint(0, 1) == 1
         reverse = randint(0, 1) == 1
 
-        snake = [
-            [iy_0, ix_0 + i] if horizontal else [iy_0 + i, ix_0]
-            for i in range(snake_length)
-        ]
+        snake = [[i, j + k] if horizontal else [i + k, j] for k in range(snake_length)]
 
         return snake if not reverse else list(reversed(snake))
 
@@ -133,13 +130,13 @@ class SnakeGame:
         2
         """
         # Place head of the snake
-        iy, ix = self.snake[0]
-        self.board[iy][ix] = self.HEAD
+        i, j = self.snake[0]
+        self.board[i][j] = self.HEAD
 
         # Place the body of the snake
         for point in self.snake[1:]:
-            iy, ix = point
-            self.board[iy][ix] = self.BODY
+            i, j = point
+            self.board[i][j] = self.BODY
 
     def _place_food(self):
         """Class method placing food on the board. To do this you need to find
@@ -157,18 +154,18 @@ class SnakeGame:
         >>> len(sg.food)
         2
         """
-        ix = randint(1, self.board_width - 2)
-        iy = randint(1, self.board_height - 2)
+        i = randint(1, self.board_width - 2)
+        j = randint(1, self.board_height - 2)
 
-        point = [iy, ix]
+        point = [i, j]
 
         while point in self.snake:
-            ix = randint(1, self.board_width - 2)
-            iy = randint(1, self.board_height - 2)
+            i = randint(1, self.board_width - 2)
+            j = randint(1, self.board_height - 2)
 
-            point = [iy, ix]
+            point = [i, j]
 
-        self.board[iy][ix] = self.FOOD
+        self.board[i][j] = self.FOOD
 
         return point
 
