@@ -78,23 +78,22 @@ class DNN_Engine:
         time.sleep(speed)
         predictions = []
         for action in range(-1, 2):
-            #input_data = self.get_input_data(state, action)
-            #snake, food, board = self.generate_observation(state)
-            prev_observation = self.training_obs(state)
-            input_data = self.add_action_to_observation(prev_observation, action)
+            prev_observation = self.get_observation(state)
+            input_data = np.append(action, prev_observation)
             x = torch.tensor(input_data.reshape(-1, 5))
             predictions.append(self.model(x.float()))
         return np.argmax(np.array(predictions))-1
 
-    def get_angle(self, food):
+    @staticmethod
+    def get_angle(food):
         """Get angle between snake and food in the coordinate system of snake. """
         # XXX: find anti-clock-wise angle between some point a and some point b
         # return None
         
         return np.arctan2(food[1], food[0])
 
-
-    def get_distance(self, state):
+    @staticmethod
+    def get_distance(state):
         """Get distance between origin and coordinate b. """
         # XXX: find distance between some point b and origin
         # return None
@@ -103,7 +102,8 @@ class DNN_Engine:
         b = np.array(state.food)
         return np.linalg.norm(a - b)
 
-    def snake_direction(self, state):
+    @staticmethod
+    def snake_direction(state):
         """Returns the moving direction of the snake. """
         # XXX: Here, you should find a unit vector of
         # return None
@@ -114,16 +114,14 @@ class DNN_Engine:
         ]
         return np.array(snake_dir)
 
-        
-    def get_vision(self, state):
-        """Get vision of snake."""
+    @staticmethod
+    def get_vision(snake_head,snake_dir,snake_dir_ort,board):
+        """Get vision of snake (in front, to the left and to the right)."""
         # XXX: Implement
-        snake_head = np.array(state.snake[0])
-        board = np.array(state.board)
         
-        front = snake_head + self.snake_dir              # front coordinate
-        right = snake_head - self.snake_dir_ort          # right coordinate
-        left = snake_head + self.snake_dir_ort           # left coordinate
+        front = snake_head + snake_dir              # front coordinate
+        right = snake_head - snake_dir_ort          # right coordinate
+        left = snake_head + snake_dir_ort           # left coordinate
         try:
             vision = [board[front[0],front[1]], 
                       board[right[0],right[1]], 
@@ -133,111 +131,85 @@ class DNN_Engine:
 
         return vision
         
-    def turn_to_the_left(self, vector):
-        return [-vector[1], vector[0]]
-        
-    def transform_coord(self, state, coord):
+    @staticmethod
+    def transform_coord(coord,snake_head,snake_dir,snake_dir_ort):
         """Tranform coordinate. """
-        matrix = np.array([self.snake_dir, self.snake_dir_ort])
-        coord = np.array(coord) - np.array(state.snake[0])
+        
+        # Define transformation matrix
+        matrix = np.array([snake_dir, snake_dir_ort])
+        
+        # Move coordinate system such that the snake head is origin
+        coord = np.array(coord) - np.array(snake_head)
+        
+        # Rotate coordinate system relative to the snake direction
         trans = matrix.dot(coord)
         return [int(trans[0]), int(trans[1])]
         
-    def generate_observation(self, state): #, action):
-        # Returns all positions in coordinate system relative
-        # to the snake head
+    def get_observation(self,state):
+        """Generate observation to be used as input to
+        the neural network. The next action is not known at this point,
+        so we need to add it later. """
         
-        self.snake_dir = self.snake_direction(state)
-        self.snake_dir_ort = self.turn_to_the_left(self.snake_dir)  # Normal to snake_dir
+        # Moving direction of snake head
+        snake_dir = self.snake_direction(state)
         
-        # Tranform snake
-        transform_snake = state.snake.copy()
-        for i in range(len(transform_snake)):
-            transform_snake[i] = self.transform_coord(state, transform_snake[i])
+        # Unit vector pointing orthogonal to the moving direction
+        snake_dir_ort = np.asarray(state._turn_left(snake_dir[0], snake_dir[1]))
             
         # Transform food to snake coordinates
-        transform_food = self.transform_coord(state, state.food)
+        transform_food = self.transform_coord(state.food, state.snake[0], snake_dir, snake_dir_ort)
         
         # Snake vision
-        vision = self.get_vision(state)
-        #angle = self.get_angle(state)
-        #return np.array([action, vision[0], vision[1], vision[2], angle])
-
-        return transform_snake, transform_food, vision
+        vision = self.get_vision(state.snake[0], snake_dir, snake_dir_ort, state.board)
         
-    def training_obs(self,state):
-        #snake, food, board = self.generate_observation(state)
-        
-        self.snake_dir = self.snake_direction(state)
-        self.snake_dir_ort = self.turn_to_the_left(self.snake_dir)  # Normal to snake_dir
-        
-        # Tranform snake
-        transform_snake = state.snake.copy()
-        for i in range(len(transform_snake)):
-            transform_snake[i] = self.transform_coord(state, transform_snake[i])
-            
-        # Transform food to snake coordinates
-        transform_food = self.transform_coord(state, state.food)
-        
-        # Snake vision
-        vision = self.get_vision(state)
-        
-        obs = vision.copy()
+        # Angle towards the food seen from snake
         angle = self.get_angle(transform_food)
-        obs.append(angle)
-        return np.array(obs)
+        return np.array([vision[0], vision[1], vision[2], angle])
         
-    def get_input_data(self, state, action):
-        vision = self.get_vision(state)
-        angle = self.get_angle(state)
-        return np.array([action, vision[0], vision[1], vision[2], angle])
-        
-    def pack_data(self, state, action, target):
+    @staticmethod
+    def pack_data(input_data,action,target):
         """Pack input data and target for the current move.
         should take the form:
-        [[action, vision, angle], target]
+        [(action, vision, angle), target]
         """
         # XXX: Implement
-        input_data = self.training_obs(state)
         input_data = np.append(action, input_data)
         return [input_data, target]
         
-    def add_action_to_observation(self,observation, action):
-        return np.append([action], observation)
-        
     def generate_training_data(self,initial_games,goal_steps):
-
-        """Generate training data based on random action. """
+        """Generate training data for the neural network 
+        based on random action. """
         training_data = []
         from tqdm import tqdm
-
         for i in tqdm(range(initial_games)):
             state = SnakeGame()
             prev_food_distance = self.get_distance(state)
             prev_score = state.score
-            prev_observation = self.training_obs(state) #snake, food, board)
+            prev_observation = self.get_observation(state)
             for j in range(goal_steps):
                 action = self.generate_random_action(state)
                 state = state(action)
+                
+                # We will now evaluate the performed moves, using
+                # a target system where -1 means a bad move, 0 means a neutral 
+                # move and 1 means a good move. 
+                
+                # A move is bad if the snake crashes.  
                 if state.done:
-                    #target = -1         # The move causing death is always bad
-                    #training_data.append(self.pack_data(state, action, target))
-                    training_data.append([self.add_action_to_observation(prev_observation, action), -1])
-
+                    target = -1
+                    training_data.append(self.pack_data(prev_observation, action, target))
                     break
                 else:
-                    # Scoring includes effect on food distance
                     food_distance = self.get_distance(state)
+                    
+                    # A move is considered as good if the snake 
+                    # gets closer to the food or eats the food. 
                     if state.score > prev_score or food_distance < prev_food_distance:
-                        #target = 1      # Motivate high score and low distance
-                        training_data.append([self.add_action_to_observation(prev_observation, action), 1])
+                        target = 1
                     else:
-                        #target = 0
-                        training_data.append([self.add_action_to_observation(prev_observation, action), 0])
-                    #snake, food, board = self.generate_observation(state)
-                    prev_observation = self.training_obs(state) #snake, food, board)
-                    #training_data.append(self.pack_data(state, action, target))
-
+                        target = 0
+                    training_data.append(self.pack_data(prev_observation, action, target))
+                    prev_observation = self.get_observation(state)
                     prev_food_distance = food_distance
                     prev_score = state.score
         return training_data
@@ -269,14 +241,14 @@ class DNN_Engine:
 
         # Train network
         for epoch in range(max_iter):
-            # Forward Propagation
+            # Forward propagation
             y = self.model(x.float())
             loss = loss_func(y, t.float())
             print("epoch: ", epoch, " loss: ", loss.item())  # Zero the gradients
             optimizer.zero_grad()
 
             # Backward propagation
-            loss.backward()  # perform a backward pass (backpropagation)
+            loss.backward()   # perform a backward pass (backpropagation)
             optimizer.step()  # update parameters
 
     def visualise_game(self, vis_steps=500):
