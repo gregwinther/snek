@@ -89,11 +89,15 @@ class DNN_Engine:
         """
         time.sleep(speed)
         predictions = []
+        
+        # Try all possible actions
         for action in range(-1, 2):
             prev_observation = self.get_observation(state)
             input_data = np.append(action, prev_observation)
             x = torch.tensor(input_data.reshape(-1, 5))
             predictions.append(self.model(x.float()))
+            
+        # Choose the best action
         return np.argmax(np.array(predictions))-1
         
     def generate_action(self, state):
@@ -128,7 +132,7 @@ class DNN_Engine:
         >>> get_angle([1, 0])
         0.0
         """
-        return np.arctan2(food[1], food[0])
+        pass
 
     @staticmethod
     def get_distance(snake_head,food):
@@ -153,9 +157,7 @@ class DNN_Engine:
         >>> get_distance([1,0], [2,1])
         1.4142135623730951
         """
-        snake_head = np.array(snake_head)
-        food = np.array(food)
-        return np.linalg.norm(snake_head - food)
+        pass
 
     @staticmethod
     def snake_direction(snake):
@@ -176,11 +178,7 @@ class DNN_Engine:
         >>> snake_direction([[3,2],[3,1],[4,1]])
         [1,0]
         """
-        snake_dir = [
-            snake[0][0] - snake[1][0],
-            snake[0][1] - snake[1][1],
-        ]
-        return np.array(snake_dir)
+        pass
 
     @staticmethod
     def get_vision(snake_head,snake_dir,snake_dir_ort,board):
@@ -205,18 +203,7 @@ class DNN_Engine:
             list containing what is in the front, to the right and to
             the left of the snake.
         """
-        
-        front = snake_head + snake_dir              # front coordinate
-        right = snake_head - snake_dir_ort          # right coordinate
-        left = snake_head + snake_dir_ort           # left coordinate
-        try:
-            vision = [board[front[0]][front[1]], 
-                      board[right[0]][right[1]], 
-                      board[left[0]][left[1]]]
-        except:
-            vision = [1, 1, 1]
-
-        return vision
+        pass
         
     @staticmethod
     def transform_coord(coord,snake_head,snake_dir,snake_dir_ort):
@@ -374,9 +361,9 @@ class DNN_Engine:
             object containing the pytorch model
         """
         modules = []
-        modules.append(nn.Linear(5, 25))
-        modules.append(nn.ReLU())
-        modules.append(nn.Linear(25, 1))
+        
+        # TODO: Append modules (layers and activation functions) to modules
+        
         self.model = nn.Sequential(*modules)
         return self.model
 
