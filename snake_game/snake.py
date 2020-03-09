@@ -294,16 +294,17 @@ class SnakeGame:
 if __name__ == "__main__":
     import numpy as np
     import time
+    import os
 
     # Test initialization
     state = SnakeGame(board_width=10, board_height=10, initial_length=3)
-    print("\033c", end="")
+    os.system("cls" if os.name == "nt" else "clear")
     print(np.array(state.board))
 
     time.sleep(0.5)
 
     for i in range(10):
         state(choice(list(state.ACTIONS.values())))
-        print("\033c", end="")
+        os.system("cls" if os.name == "nt" else "clear")
         print(np.array(state.board))
         time.sleep(0.5)
