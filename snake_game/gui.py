@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -36,7 +37,7 @@ class TerminalGui:
         self._clear_terminal()
 
     def _clear_terminal(self):
-        print("\033c", end="")
+        os.system("cls" if os.name == "nt" else "clear")
 
     def render(self, state):
         self._clear_terminal()
