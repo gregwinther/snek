@@ -101,8 +101,8 @@ if __name__ == "__main__":
     from snake import SnakeGame
     from gui import MatplotlibGui, TerminalGui, YeetTerminalGui, NoGui
 
-    snake_game = SnakeGame()
-    keyboard_listener = KeyboardListener(snake_game)
+    snake_game = SnakeGame(6, 7)
+    # keyboard_listener = KeyboardListener(snake_game)
 
-    player = Player(snake_game, best_engine, NoGui(), speed=0)
+    player = Player(snake_game, best_engine, YeetTerminalGui(), speed=1)
     player.play_game()
