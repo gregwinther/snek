@@ -154,14 +154,14 @@ class SnakeGame:
         >>> len(sg.food)
         2
         """
-        i = randint(1, self.board_width - 2)
-        j = randint(1, self.board_height - 2)
+        i = randint(1, self.board_height - 2)
+        j = randint(1, self.board_width - 2)
 
         point = [i, j]
 
         while point in self.snake:
-            i = randint(1, self.board_width - 2)
-            j = randint(1, self.board_height - 2)
+            i = randint(1, self.board_height - 2)
+            j = randint(1, self.board_width - 2)
 
             point = [i, j]
 
