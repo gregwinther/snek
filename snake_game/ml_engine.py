@@ -43,7 +43,7 @@ class Random:
 ################################################################
 
 
-class DNN_Engine:
+class DNNEngine:
     """Snake engine controlled by a fully connected dense neural
     network. 
     
@@ -127,9 +127,9 @@ class DNN_Engine:
         float
             which way the food is in the coordinate system of snake
         
-        >>> DNN_Engine.get_angle([0, 1])
+        >>> DNNEngine.get_angle([0, 1])
         1.5707963267948966
-        >>> DNN_Engine.get_angle([1, 0])
+        >>> DNNEngine.get_angle([1, 0])
         0.0
         """
         pass
@@ -152,9 +152,9 @@ class DNN_Engine:
         float
             euclidean distance between snake and food
             
-        >>> DNN_Engine.get_distance([1,0], [4,0])
+        >>> DNNEngine.get_distance([1,0], [4,0])
         3.0
-        >>> DNN_Engine.get_distance([1,0], [2,1])
+        >>> DNNEngine.get_distance([1,0], [2,1])
         1.4142135623730951
         """
         pass
@@ -173,10 +173,10 @@ class DNN_Engine:
         ndarray
             unit vector in the moving direction of the snake.
             
-        >>> DNN_Engine.snake_direction([[5,6],[5,5],[5,4]])
-        [0,1]
-        >>> DNN_Engine.snake_direction([[3,2],[3,1],[4,1]])
-        [0,1]
+        >>> DNNEngine.snake_direction([[5,6],[5,5],[5,4]])
+        array([0, 1])
+        >>> DNNEngine.snake_direction([[3,2],[3,1],[4,1]])
+        array([0, 1])
         """
         pass
 
