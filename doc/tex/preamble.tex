@@ -1,0 +1,113 @@
+\usepackage[utf8]{inputenc}		% for UTF8 characters
+%\usepackage[norsk]{babel}		% manages typographical rules for English
+\usepackage{csquotes}			% quotes that support babel
+\usepackage{graphicx} 			% include graphics
+\usepackage{verbatim} 			% include files with special characters
+\usepackage{tabularx}			% fancy tables
+\usepackage{booktabs}			% lines in tables
+\usepackage{mathbbol}			% bold math symbols
+\usepackage{float}				% fix object
+\usepackage{color}				% colors
+\usepackage{array} 				% for column alignment
+\usepackage{listings}			% listings of code
+\usepackage{hyperref}			% cross-reference
+\usepackage{amsmath}			% various math symbols
+\usepackage{physics}			% Dirac notation and matrices
+\usepackage{amssymb}			% more math symbols
+%\usepackage{comment}			% in-line comments
+\usepackage{makecell}			% new line in cell
+\usepackage{subfig}				% sub figures
+\usepackage{empheq}				% beautiful equation boxes
+\usepackage{multirow}			% multirow in table
+\usepackage{multicol}			% multicolumn in table
+\usepackage{varwidth}			% rotate text in table
+\usepackage{arydshln}   		% dashed lines in table
+\usepackage{framed}
+\usepackage{xargs} 
+\usepackage{copyrightbox}		% copyright of images
+\usepackage{mathpazo}  			% consistent nice math font 
+\usepackage{mathtools}			% more math symbols
+\usepackage{appendixnumberbeamer}	% appendix slides (backup slides)
+%\usepackage{pgfpages}			% separate note slides
+\usepackage{listings}
+
+% biblatex
+\usepackage[backend=bibtex,
+			%sorting=none,
+			style=nature
+]{biblatex}
+\addbibresource{refs.bib}
+
+% footnote position in slides
+\usepackage[absolute,
+			overlay
+]{textpos}
+
+% beamer presentation tool for Linux (display frames and notes separately)
+%\usepackage[duration=35, 
+%			lastminutes=10
+%]{pdfpcnotes} 
+
+% colors
+\definecolor{maincolor}{RGB}{28, 39, 131}			% to be used in titles, progression wheel and references
+\definecolor{empheqbackground}{RGB}{153, 153, 255}	% to be used as equation and quote background
+
+\captionsetup[figure]{labelfont={color=maincolor}}
+\captionsetup[table]{labelfont={color=maincolor}}
+
+% tikz
+\setcounter{secnumdepth}{4}
+\usetikzlibrary{through, shapes, calc, arrows, positioning, arrows.meta, shadows, er, spy, external, decorations} 
+\tikzstyle{neuron}=[draw,circle,minimum size=20pt,inner sep=0pt, fill=white]
+\tikzstyle{stateTransition}=[thick]
+\tikzstyle{learned}=[text=red]
+
+\tikzset{basic/.style={draw,fill=blue!20,text width=1em,text badly centered}}
+\tikzset{input/.style={basic,circle,fill=empheqbackground}}
+\tikzset{weights/.style={basic,rectangle,fill=empheqbackground!90}}
+\tikzset{functions/.style={basic,circle,fill=empheqbackground!80}}
+
+% listings
+\lstset{language=Python, 
+		basicstyle=\ttfamily,
+		backgroundcolor=\color{empheqbackground}
+}
+
+%empheq equation color box
+\newlength\mytemplen
+\newsavebox\mytempbox
+
+\makeatletter
+\newcommand\mybluebox{%
+	\@ifnextchar[%]
+	{\@mybluebox}%
+	{\@mybluebox[0pt]}}
+
+\def\@mybluebox[#1]{%
+	\@ifnextchar[%]
+	{\@@mybluebox[#1]}%
+	{\@@mybluebox[#1][0pt]}}
+
+\def\@@mybluebox[#1][#2]#3{
+	\sbox\mytempbox{#3}%
+	\mytemplen\ht\mytempbox
+	\advance\mytemplen #1\relax
+	\ht\mytempbox\mytemplen
+	\mytemplen\dp\mytempbox
+	\advance\mytemplen #2\relax
+	\dp\mytempbox\mytemplen
+	\colorbox{empheqbackground}{\hspace{1em}\usebox{\mytempbox}\hspace{1em}}}
+
+% double quotes
+\newcommand*\openquote{\makebox(40,-5){\scalebox{5}{``}}}
+\newcommand*\closequote{\makebox(25,-22){\scalebox{5}{''}}}
+\colorlet{shadecolor}{empheqbackground}
+\makeatletter
+\newif\if@right
+\def\shadequote{\@righttrue\shadequote@i}
+\def\shadequote@i{\begin{snugshade}\begin{quote}\openquote}
+		\def\endshadequote{%
+			\if@right\hfill\fi\closequote\end{quote}\end{snugshade}}
+\@namedef{shadequote*}{\@rightfalse\shadequote@i}
+\@namedef{endshadequote*}{\endshadequote}
+\makeatother

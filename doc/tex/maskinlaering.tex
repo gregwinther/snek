@@ -1,0 +1,208 @@
+\documentclass[norsk]{beamer}				% frames
+%\documentclass[notes, norsk]{beamer}		% frames + notes
+%\documentclass[notes=only]{beamer}	% notes
+\input{preamble.tex}
+\input{frames.tex}
+\input{defs.tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SPECIFY INFORMATION TO BE USED IN FRONT FRAME
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\mtitle}{Maskinlæring}
+\newcommand{\mauthor}{Even Marius Nordhagen}
+\newcommand{\mmail}{evenmn@fys.uio.no}
+\newcommand{\massignn}{.}
+
+\begin{document}
+
+\frontframe
+
+\note{
+	\begin{itemize}
+		\item This is an example presentation about quantum mechanics
+		\item The front frame is generated using \textit{frontframe}
+		\item Note also that the notes can be turned on and off in the first line of this file
+	\end{itemize}
+}
+
+\mframe{Oversikt}{}{
+	\begin{itemize}
+		\setlength\itemsep{1em}	% This line specifies the spacing between bullet points
+		\item Motivasjon
+		\item Teorien bak
+		\item Implementasjon
+		\item Dere skal implementere et nevralt nettverk
+	\end{itemize}
+}
+
+\note{Dette er planen for dagen}
+
+\titleframe{Motivasjon}
+
+\mframe{Regresjon}{}{
+	Regresjon er en enkel form for maskinlæring
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=6cm]{../images/regression.png}
+	\end{figure}
+}
+
+\note{Konsept dere kanskje er kjente med}
+
+\mframe{Bildeanalyse}{}{
+	Kjenne igjen hva som er på et bilde og hvor objektene befinner seg
+	\begin{figure}
+		\centering
+		\includegraphics[width=10cm]{../images/image_recognition.jpg}
+	\end{figure}
+}
+
+\note{kfkffk}
+
+\mframe{Generative modeller}{}{
+	\begin{figure}
+		\centering
+		\includegraphics[width=10cm]{../images/aifaces_feat.jpg}
+	\end{figure}
+}
+
+\mframe{Andre eksempler}{}{
+	\begin{itemize}
+		\setlength\itemsep{1em}	% This line specifies the spacing between bullet points
+		\item Stemmegjenkjenning
+		\item Taktikkspill
+		\item Autonom teknologi
+	\end{itemize}
+}
+
+\titleframe{Nevrale nettverk}
+
+\mframe{Hva er et nevralt nettverk?}{}{
+	\begin{itemize}
+		\setlength\itemsep{2em}
+		\item<1-> Inspirert av biologi og hjerneforskning
+		\item<2-> Fleksible funksjoner $\rightarrow$ mange parametere
+		\item<3-> Feedforward nettverk kan representere enhver funksjon
+	\end{itemize}
+	\note <1>{Basert på studier av hvordan hjernen lærer}
+	\note <2->{Feedforward er det viktigste nevrale nettverket, og det som ofte brukes til å illustrere et nevralt nettverk. Ved å justere parameterne i et feedforward nettverk, kan man tilpasse enhver kontinuerlig funksjon.} 
+}
+
+\mframe{Nevralt nettverk: Feedforward}{Fase: Fremover}{
+	\begin{figure}
+		\centering
+		\begin{overprint}[9cm]
+			\onslide<1>\input{../tikz/multilayer_perceptron_presentation1.tex}
+			\onslide<2>\input{../tikz/multilayer_perceptron_presentation2.tex}
+			\onslide<3>\input{../tikz/multilayer_perceptron_presentation3.tex}
+			\onslide<4>\input{../tikz/multilayer_perceptron_presentation4.tex}
+		\end{overprint}
+	\end{figure}
+	\note<1->{Dette nettverket tar inn en input med informasjon på venstre side. Denne informasjonen blir deretter matet fremover i nettverket, og er derfor kalt et feedforward nevralt nettverk. For at nettverket skal trenes opp, trenger vi targets som forteller hva vi forventer å få ut med noen gitte inputs. Man sammenligner deretter det nettverket gir ut med det man forventer. }
+}
+
+\mframe{Nevralt nettverk: Feedforward}{Aktiveringsfunksjon}{
+	En aktiveringsfunksjon brukes for å \textit{aktivere} inputen til hvert lag. Rectified Linear Unit (ReLU) er en vanlig funksjon:
+	\begin{figure}
+		\includegraphics[scale=.3]{../images/ReLU.eps}
+	\end{figure}
+}
+
+\mframe{Nevralt nettverk: Feedforward}{Feilestimat}{
+	En mye brukt kostfunksjon er minste kvadraters metode: 
+	\begin{equation}
+	\mathcal{C} = \frac{1}{2}\left(\boldsymbol{y}-\tilde{\boldsymbol{y}}\right)^2
+	\end{equation}
+}
+\note{Feilen defineres av en kostfunksjon. Det er mange typer kostfunksjoner.}
+
+\mframe{Nevralt nettverk: Feedforward}{Fase: Bakover}{
+	\begin{figure}
+		\centering
+		\begin{overprint}[9cm]
+			\onslide<1>\input{../tikz/multilayer_perceptron_presentation4.tex}
+			\onslide<2>\input{../tikz/multilayer_perceptron_presentation3.tex}
+			\onslide<3>\input{../tikz/multilayer_perceptron_presentation2.tex}
+			\onslide<4>\input{../tikz/multilayer_perceptron_presentation1.tex}
+		\end{overprint}
+	\end{figure}
+	\note<1->{Gå bakover i nettet og korriger for feilen ved å justere parameterne på en smart måte. Ønsker å minimere kostfunksjon. Læringsraten forteller hvor mye parameterne skal justeres hver gang.}
+}
+
+\titleframe{Nevralt nettverk for snake}
+
+\mframe{Treningsdata for nettverket}{}{
+	Nettverket trenger informasjon for å avgjøre hvilken vei slangen skal bevege seg. Det vi velger å sende inn er:
+	\pause
+	\begin{itemize}
+		\setlength\itemsep{2em}
+		\item I hvilken retning er maten?
+		\item Hva befinner seg foran slangen?
+		\item Hvilken vei valgte slangen  gå i den situasjonen?
+		\item En evaluering av valget
+	\end{itemize}
+}
+
+\mframe{Treningsdata for nettverket}{Evaluering}{
+	Vi implementerer noen veldig enkle regler for å evaluere en avgjørelse: 
+	\begin{itemize}
+		\item Dårlig (-1)
+		\item Middels (0)
+		\item Bra (+1)
+	\end{itemize}
+	\vspace{1cm}
+	Det som kjennetegner en dårlig avgjørelse er at slangen kræsjer. Det som kjennetegner en god avgjørelse, er at den nærmer seg maten. Alt annet er middels.
+}
+
+\mframe{Nevralt nettverk i Pytorch}{Installasjon}{
+	Ved hjelp av Anaconda:
+	
+	\vspace{3mm}
+	
+	\lstinline| conda install pytorch torchvision -c pytorch |
+	\vspace{1cm}
+	
+	Oversikt over installasjonsmethoder: \url{https://pytorch.org/}
+}
+
+\mframe{Nevralt nettverk i Pytorch}{Bestemme arkitektur}{
+	I Pytorch kan man lage en liste med moduler som spesifiserer arkitekturen til det nevrale nettverket. \bigskip
+	
+	
+	
+	Start med å importere \lstinline| torch	|:
+	\vspace{3mm}
+	
+	\lstinline| import torch | \\
+	\lstinline| import torch.nn as nn |
+	\vspace{8mm}
+	
+	Definer skjult lag med 25 noder og 5 noder til venstre:
+	\vspace{2mm}
+	
+	\lstinline| modul1 = nn.Linear(5, 25)|
+	\vspace{8mm}
+	
+	Definer aktiveringsfunksjon (ReLU):
+	\vspace{2mm}
+	
+	\lstinline| modul2 = nn.ReLU() |
+}
+
+\mframe{Nevralt nettverk i Pytorch}{Bestemme arkitektur}{
+	\begin{figure}
+		\centering
+		\includegraphics[width=5cm]{../images/fnn.png}
+	\end{figure}
+	\lstinline| modules = [] |\\
+	\lstinline| modules.append(nn.Linear(3, 5)) |\\
+	\lstinline| modules.append(nn.ReLU()) |\\
+	\lstinline| modules.append(nn.Linear(5, 5)) |\\
+	\lstinline| modules.append(nn.ReLU()) |\\
+	\lstinline| modules.append(nn.Linear(5, 2)) |\\
+	\lstinline| model = nn.Sequential(*modules) |
+}
+
+\end{document}

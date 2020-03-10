@@ -1,0 +1,80 @@
+% Beamer style
+ \setlength{\TPHorizModule}{10mm}
+\setlength{\TPVertModule}{\TPHorizModule}
+\textblockorigin{1mm}{1mm} % start everything near the top-left corner
+\setlength{\parindent}{0pt}
+
+\setbeamertemplate{itemize items}{\color{maincolor}$\blacktriangleright$}  % triangular bullet points
+\setbeamertemplate{bibliography item}{\insertbiblabel}                      % for reference slide
+%\setbeameroption{show notes on second screen=right}                         % where to display notes
+\addtobeamertemplate{footnote}{}{\vspace{10ex}}								% footnote spacing
+\mathtoolsset{showonlyrefs}													% ignore unused references
+\usefonttheme{serif}														% serif font
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}							% special characters as footnote symbols
+\renewcommand*{\bibfont}{\tiny}												% reference fontsize tiny
+
+\setbeamercolor{titlelike}{fg=black}
+\setbeamercolor{block title}{fg=white}
+\setbeamercolor{block title}{bg=black}
+\setbeamercolor{block body}{bg=maincolor}
+
+\setbeamerfont{itemize/enumerate body}{size=\scriptsize}
+\setbeamerfont{itemize/enumerate subbody}{size=\scriptsize}
+\setbeamerfont{itemize/enumerate subsubbody}{size=\scriptsize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FRONT FRAME
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\frontframe}{
+	\begin{frame}
+		%\titlepage 
+		\thispagestyle{empty}
+		\begin{center}
+			\Large{\textcolor{black}{\mtitle}}\\ \vspace{0.5cm}
+			\includegraphics[scale=.3]{../images/UiO_Segl_pms485.eps} \\ \vspace{0.5cm}
+			\large{\mauthor}\\ \vspace{0.3cm}
+			\scriptsize{Universitet i Oslo} \\ \vspace{0.2cm}
+			\scriptsize{\textit{\mmail}} \\ \vspace{0.5cm}
+			\large{\today} \\ \vfill
+		\end{center}
+	\end{frame}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ORDINARY FRAME
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\mframe}[3]{
+	\frame{
+		% PROGRESSION WHEEL 
+		\begin{textblock}{3}(0.5,8)
+			\begin{tikzpicture}[x=1mm,y=1mm]
+			\foreach \x in {1,2,...,\inserttotalframenumber} 
+			\draw [gray!30,very thick] (\x/\inserttotalframenumber*360:3) -- (\x/\inserttotalframenumber*360:4);
+			\foreach \x in {1,2,...,\insertframenumber}
+			\draw[maincolor,very thick] (\x/\inserttotalframenumber*360:3) -- (\x/\inserttotalframenumber*360:4);
+			\node at (0,0) [] {\tiny{\textbf{\textcolor{black}{\insertframenumber}}}};
+			\end{tikzpicture}
+		\end{textblock}
+	
+		% UIO LOGO
+		\begin{textblock}{3}(4.2,8.3)
+			\centering
+			\includegraphics[scale=.2]{../images/UiO_Segl_A_cmyk.eps}
+		\end{textblock}
+		\frametitle{\textcolor{maincolor}{#1}}
+		\framesubtitle{#2}
+		\vspace{-0.5cm}
+		\scriptsize{#3}}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TITLED FRAME
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\titleframe}[1]{
+	\mframe{}{}{
+		\begin{center}
+			{\Huge \textcolor{maincolor}{#1}}
+		\end{center}
+	}
+}
