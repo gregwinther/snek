@@ -127,9 +127,9 @@ class DNN_Engine:
         float
             which way the food is in the coordinate system of snake
         
-        >>> get_angle([0, 1])
+        >>> DNN_Engine.get_angle([0, 1])
         1.5707963267948966
-        >>> get_angle([1, 0])
+        >>> DNN_Engine.get_angle([1, 0])
         0.0
         """
         pass
@@ -152,9 +152,9 @@ class DNN_Engine:
         float
             euclidean distance between snake and food
             
-        >>> get_distance([1,0], [4,0])
+        >>> DNN_Engine.get_distance([1,0], [4,0])
         3.0
-        >>> get_distance([1,0], [2,1])
+        >>> DNN_Engine.get_distance([1,0], [2,1])
         1.4142135623730951
         """
         pass
@@ -173,10 +173,10 @@ class DNN_Engine:
         ndarray
             unit vector in the moving direction of the snake.
             
-        >>> snake_direction([[5,6],[5,5],[5,4]])
+        >>> DNN_Engine.snake_direction([[5,6],[5,5],[5,4]])
         [0,1]
-        >>> snake_direction([[3,2],[3,1],[4,1]])
-        [1,0]
+        >>> DNN_Engine.snake_direction([[3,2],[3,1],[4,1]])
+        [0,1]
         """
         pass
 
@@ -193,7 +193,8 @@ class DNN_Engine:
         snake_dir : ndarray
             the moving direction of snake
         snake_dir_ort : ndarray
-            unit vector that is orthogonal to the moving direction
+            unit vector that is orthogonal to the moving direction 
+            in the left direction
         board : nested list
             the board
             
@@ -201,7 +202,7 @@ class DNN_Engine:
         -------
         list
             list containing what is in the front, to the right and to
-            the left of the snake.
+            the left of the snake: vision = [FRONT, RIGHT, LEFT]
         """
         pass
         
